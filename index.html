@@ -312,6 +312,7 @@
     
     <footer>
         <p>
+            <a href="tel:+201096333138">(+20)1096333138</a> | 
             <a href="mailto:mohamed.nabil.seddik@gmail.com">mohamed.nabil.seddik@gmail.com</a> | 
             <a href="https://www.linkedin.com/in/mohamed-nabil-seddik/" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a> |
             <a href="https://www.instagram.com/cufemews/" target="_blank" rel="noopener noreferrer">CUFE MEWS Instagram</a>
@@ -448,6 +449,11 @@
             const plannerContainer = document.getElementById('plannerContainer');
             const majorSelector = document.getElementById('majorSelector');
             let draggedItem = null;
+            
+            // NEW: Variables for auto-scroll
+            let isDragging = false;
+            let currentY = 0;
+
 
             function initApp() {
                 populateMajorSelector();
@@ -457,7 +463,12 @@
                 document.getElementById('saveButton').addEventListener('click', savePlan);
                 document.getElementById('loadButton').addEventListener('click', loadPlan);
                 document.getElementById('clearButton').addEventListener('click', clearSavedData);
-                addTouchListeners(); // <-- Add this new function call
+                addTouchListeners();
+                
+                // NEW: Start the auto-scroll loop and add listeners to track cursor position
+                autoScrollLoop();
+                plannerContainer.addEventListener('dragover', e => { currentY = e.clientY; });
+                plannerContainer.addEventListener('touchmove', e => { if (e.touches.length > 0) { currentY = e.touches[0].clientY; } }, { passive: false });
             }
 
             function populateMajorSelector() {
@@ -564,10 +575,35 @@
                     courseEl.appendChild(deleteBtn);
                 }
 
-                courseEl.addEventListener('dragstart', () => { draggedItem = courseEl; setTimeout(() => courseEl.classList.add('dragging'), 0); });
-                courseEl.addEventListener('dragend', () => { if(draggedItem) {draggedItem.classList.remove('dragging');} draggedItem = null; });
+                // UPDATED: Set isDragging flag for both desktop and mobile
+                courseEl.addEventListener('dragstart', () => { 
+                    draggedItem = courseEl; 
+                    isDragging = true;
+                    setTimeout(() => courseEl.classList.add('dragging'), 0); 
+                });
+                courseEl.addEventListener('dragend', () => { 
+                    if(draggedItem) { draggedItem.classList.remove('dragging'); } 
+                    draggedItem = null; 
+                    isDragging = false;
+                });
+                
                 courseEl.querySelector('.grade-selector').addEventListener('change', () => { updateAllCalculations(); });
                 return courseEl;
+            }
+            
+            // NEW: Auto-scroll function
+            function autoScrollLoop() {
+                requestAnimationFrame(autoScrollLoop);
+                if (!isDragging) return;
+
+                const scrollThreshold = 75; // Pixels from the edge to trigger scroll
+                const scrollSpeed = 15;     // How fast to scroll
+
+                if (currentY < scrollThreshold) {
+                    window.scrollBy(0, -scrollSpeed); // Scroll up
+                } else if (currentY > window.innerHeight - scrollThreshold) {
+                    window.scrollBy(0, scrollSpeed); // Scroll down
+                }
             }
 
             function addDragAndDropListeners() {
@@ -583,9 +619,6 @@
                 });
             }
 
-            // ==========================================================
-            // === NEW FUNCTION FOR MOBILE/TOUCH DRAG-AND-DROP ===
-            // ==========================================================
             function addTouchListeners() {
                 let touchDraggedItem = null;
                 let ghostItem = null;
@@ -594,13 +627,13 @@
 
                 plannerContainer.addEventListener('touchstart', e => {
                     const target = e.target.closest('.course-item');
-                    if (target) {
-                        e.preventDefault();
+                    if (target && !e.target.isContentEditable) { // Prevent drag when editing text
+                        isDragging = true; // Set global flag
                         touchDraggedItem = target;
 
                         const rect = target.getBoundingClientRect();
                         ghostItem = target.cloneNode(true);
-                        ghostItem.style.position = 'absolute';
+                        ghostItem.style.position = 'fixed'; // Use fixed to ignore page scroll
                         ghostItem.style.width = `${rect.width}px`;
                         ghostItem.style.height = `${rect.height}px`;
                         ghostItem.style.pointerEvents = 'none';
@@ -623,6 +656,7 @@
                     e.preventDefault();
 
                     const touch = e.touches[0];
+                    currentY = touch.clientY; // Update global Y position for auto-scroll
                     ghostItem.style.left = `${touch.clientX - startX}px`;
                     ghostItem.style.top = `${touch.clientY - startY}px`;
                     
@@ -644,6 +678,8 @@
 
                 plannerContainer.addEventListener('touchend', e => {
                     if (!touchDraggedItem) return;
+
+                    isDragging = false; // Unset global flag
 
                     if(lastOverElement) {
                         lastOverElement.appendChild(touchDraggedItem);
