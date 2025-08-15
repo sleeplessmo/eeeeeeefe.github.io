@@ -148,7 +148,12 @@
             display: flex;
             flex-direction: column;
             border-top: 5px solid #4a6fa5;
+            transition: min-height 0.4s ease-in-out;
         }
+        .semester-column.collapsed {
+            min-height: 0;
+        }
+
         .semester-column.summer-term { border-top-color: #16a085; }
         .semester-column.summer-term .credit-counter,
         .semester-column.summer-term .semester-gpa { background-color: #16a085; }
@@ -162,13 +167,17 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer; /* NEW: Make header clickable */
-            position: relative; /* NEW: For indicator positioning */
+            cursor: pointer;
+            position: relative;
+            padding-right: 25px;
         }
         
-        /* NEW: Collapsible Indicator (+/-) */
+        .semester-title-text {
+            flex-grow: 1;
+        }
+        
         .semester-column h2::after {
-            content: '−'; /* Minus sign for expanded state */
+            content: '−';
             position: absolute;
             right: 0;
             top: 50%;
@@ -176,11 +185,9 @@
             font-size: 1.5em;
             font-weight: bold;
             color: #aab5c0;
-            padding: 0 8px;
         }
-
         .semester-column.collapsed h2::after {
-            content: '+'; /* Plus sign for collapsed state */
+            content: '+';
         }
 
         .semester-stats { display: flex; gap: 6px; }
@@ -196,17 +203,15 @@
         .course-list { 
             min-height: 100px; 
             flex-grow: 1;
-            /* NEW: Styles for smooth collapse/expand */
-            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
-            max-height: 1500px; /* Large enough for any content */
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out, margin 0.4s ease-in-out;
+            max-height: 1500px;
             overflow: hidden;
-            padding-top: 10px;
+            margin-top: 10px;
         }
-        /* NEW: Collapsed state for the course list */
         .semester-column.collapsed .course-list {
             max-height: 0;
             min-height: 0;
-            padding-top: 0;
+            margin-top: 0;
             overflow: hidden;
         }
 
@@ -428,7 +433,7 @@
                     { id: "bde-c32", semester: "Semester 5", code: "SBES150", name: "Database Systems for Medical Data", credits: 3 }, { id: "bde-c33", semester: "Semester 5", code: "SBES151", name: "Measurements & Experiments", credits: 2 }, { id: "bde-c34", semester: "Semester 5", code: "SBES152", name: "Biomedical Signal Processing", credits: 3 }, { id: "bde-c35", semester: "Semester 5", code: "SBES153", name: "Biomedical Transducers", credits: 3 }, { id: "bde-c36", semester: "Semester 5", code: "SBES250", name: "Operations Research in Healthcare", credits: 3 }, { id: "bde-c37", semester: "Semester 5", code: "SBES251", name: "Entrepreneurship in Healthcare", credits: 2 }, { id: "bde-c38", semester: "Semester 5", code: "SBES252", name: "Algorithms in Medicine", credits: 3 },
                     { id: "bde-c39", semester: "Semester 6", code: "BDES280", name: "Engineering Seminar", credits: 1 }, { id: "bde-c40", semester: "Semester 6", code: "SBES160", name: "Medical Image Processing", credits: 3 }, { id: "bde-c41", semester: "Semester 6", code: "SBES161", name: "Medical Monitors & Life Support", credits: 3 }, { id: "bde-c42", semester: "Semester 6", code: "SBES162", name: "Embedded Systems in Medical Eq.", credits: 3 }, { id: "bde-c43", semester: "Semester 6", code: "CMPS203", name: "Software Engineering", credits: 3 }, { id: "bde-c44", semester: "Semester 6", code: "SBES260", name: "Medical Distributed App Dev", credits: 3 }, { id: "bde-c45", semester: "Semester 6", code: "SBES261", name: "Healthcare Facilities Planning", credits: 3 },
                     { id: "bde-c46", semester: "Summer 3", code: "BDES381", name: "Industrial Training 2", credits: 2 },
-                    { id: "bde-c47", semester: "Semester 7", code: "GENSxxx", name: "Elective EA-EB (UR E4/5)", credits: 2 }, { id: "bde-c48", semester: "Semester 7", code: "BDES481", name: "Graduation Project 1", credits: 1 }, { id: "bde-c49", semester: "Semester 7", code: "SBES180", name: "Medical Imaging Modalities I", credits: 2 }, { id: "bde-c50", semester: "Semester 7", code: "SBES271", name: "Healthcare Information Systems", credits: 2 }, { id: "bde-c51", semester: "Semester 7", code: "SBES3xx", name: "Major Elective 1", credits: 3 }, { id: "bde-c52", semester: "Semester 7", code: "SBES262", name: "Accreditations", credits: 3 }, { id: "bde-c53", semester: "Semester 7", code: "SBES3xx", name: "Major Elective 2", credits: 3 }, { id: "bde-c61", semester: "Semester 7", code: "SBES3xx", name: "Major Elective 3", credits: 3},
+                    { id: "bde-c47", semester: "Semester 7", code: "GENSxxx", name: "Elective EA-EB (UR E4/5)", credits: 2 }, { id: "bde-c48", semester: "Semester 7", code: "BDES481", name: "Graduation Project 1", credits: 1 }, { id: "bde-c49", semester: "Semester 7", code: "SBES180", name: "Medical Imaging Modalities I", credits: 2 }, { id: "bde-c50", semester: "Semester 7", code: "SBES271", name: "Healthcare Information Systems", credits: 2 }, { id: "bde-c51", semester: "Semester 7", code: "SBES3XX", name: "Major Elective 1", credits: 3 }, { id: "bde-c52", semester: "Semester 7", code: "SBES262", name: "Accreditations", credits: 3 }, { id: "bde-c53", semester: "Semester 7", code: "SBES3XX", name: "Major Elective 2", credits: 3 }, { id: "bde-c61", semester: "Semester 7", code: "SBES3XX", name: "Major Elective 3", credits: 3},
                     { id: "bde-c54", semester: "Semester 8", code: "GENSxxx", name: "Elective EA-EB (UR E4/5)", credits: 2 }, { id: "bde-c55", semester: "Semester 8", code: "BDES482", name: "Graduation Project 2", credits: 3 }, { id: "bde-c56", semester: "Semester 8", code: "SBES180", name: "Medical Imaging Modalities II", credits: 2 }, { id: "bde-c57", semester: "Semester 8", code: "SBES4xx", name: "Major Elective 4", credits: 3 }, { id: "bde-c58", semester: "Semester 8", code: "SBES4xx", name: "Major Elective 5", credits: 3 }, { id: "bde-c59", semester: "Semester 8", code: "SBES4xx", name: "Major Elective 6", credits: 3 }, { id: "bde-c60", semester: "Semester 8", code: "SBES4xx", name: "Major Elective 7", credits: 3 }
                 ],
                 "Mechanical Design (MDE)": [
@@ -581,9 +586,18 @@
                 courseEl.dataset.name = course.name;
                 courseEl.dataset.code = course.code;
 
-                const gradeOptions = ['—', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'].map(g => `<option value="${g}">${g}</option>`).join('');
+                // NEW: Check if the course is a Pass/Fail type
+                const courseNameLower = course.name.toLowerCase();
+                const isPassFail = courseNameLower.includes('training') || courseNameLower.includes('seminar');
 
-                const isDefaultPlaceholder = course.name.toLowerCase().includes('elective') || course.name.toLowerCase().includes('project') || course.name.toLowerCase().includes('training') || course.name.toLowerCase().includes('requirement') || (course.code && course.code.toUpperCase().includes('XXX'));
+                let gradeOptions;
+                if (isPassFail) {
+                    gradeOptions = ['—', 'Pass', 'Fail'].map(g => `<option value="${g}">${g}</option>`).join('');
+                } else {
+                    gradeOptions = ['—', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'F'].map(g => `<option value="${g}">${g}</option>`).join('');
+                }
+
+                const isDefaultPlaceholder = courseNameLower.includes('elective') || courseNameLower.includes('project') || (course.code && course.code.toUpperCase().includes('XXX'));
                 const canBeEdited = course.isPlaceholder || isDefaultPlaceholder;
 
                 if (canBeEdited) {
@@ -743,32 +757,48 @@
 
             function updateAllCalculations() {
                 let cumulativeQualityPoints = 0;
-                let cumulativeCreditsAttempted = 0;
+                let cumulativeGpaCredits = 0; // NEW: Credits that count towards GPA
+                let cumulativeTakenCredits = 0; // NEW: All credits with any grade (including P/F)
+
                 document.querySelectorAll('.semester-column').forEach(column => {
                     let semesterTotalCredits = 0;
                     let semesterQualityPoints = 0;
-                    let semesterGradedCredits = 0;
+                    let semesterGpaCredits = 0; // For semester GPA
+                    let semesterTakenCredits = 0; // For semester "taken" credits
+
                     column.querySelectorAll('.course-item').forEach(courseEl => {
                         const credits = parseInt(courseEl.dataset.credits);
-                        semesterTotalCredits += credits;
                         const grade = courseEl.querySelector('.grade-selector').value;
-                        if (grade in gpaMap) {
-                            semesterGradedCredits += credits;
-                            semesterQualityPoints += gpaMap[grade] * credits;
+                        
+                        semesterTotalCredits += credits;
+
+                        if (grade !== '—') {
+                            semesterTakenCredits += credits;
                             courseEl.classList.add('course-graded');
+                            
+                            // Check if the grade affects GPA (i.e., it's a letter grade)
+                            if (grade in gpaMap) {
+                                semesterGpaCredits += credits;
+                                semesterQualityPoints += gpaMap[grade] * credits;
+                            }
                         } else {
                             courseEl.classList.remove('course-graded');
                         }
                     });
-                    const semesterGpa = semesterGradedCredits > 0 ? (semesterQualityPoints / semesterGradedCredits).toFixed(2) : '0.00';
+
+                    const semesterGpa = semesterGpaCredits > 0 ? (semesterQualityPoints / semesterGpaCredits).toFixed(2) : '0.00';
                     column.querySelector('.semester-gpa').textContent = `GPA: ${semesterGpa}`;
                     column.querySelector('.credit-counter').textContent = `${semesterTotalCredits} CH`;
+
+                    // Add to cumulative totals
                     cumulativeQualityPoints += semesterQualityPoints;
-                    cumulativeCreditsAttempted += semesterGradedCredits;
+                    cumulativeGpaCredits += semesterGpaCredits;
+                    cumulativeTakenCredits += semesterTakenCredits;
                 });
-                const cumulativeGpa = cumulativeCreditsAttempted > 0 ? (cumulativeQualityPoints / cumulativeCreditsAttempted).toFixed(2) : '0.00';
+
+                const cumulativeGpa = cumulativeGpaCredits > 0 ? (cumulativeQualityPoints / cumulativeGpaCredits).toFixed(2) : '0.00';
                 document.getElementById('cumulativeGpa').textContent = `GPA: ${cumulativeGpa}`;
-                document.getElementById('totalCreditsTaken').textContent = `Credits Taken: ${cumulativeCreditsAttempted}`;
+                document.getElementById('totalCreditsTaken').textContent = `Credits Taken: ${cumulativeTakenCredits}`;
             }
 
             function addCustomCourse() {
