@@ -152,6 +152,7 @@
         .semester-column.summer-term { border-top-color: #16a085; }
         .semester-column.summer-term .credit-counter,
         .semester-column.summer-term .semester-gpa { background-color: #16a085; }
+        
         .semester-column h2 {
             margin-top: 0;
             font-size: 1.2em;
@@ -161,7 +162,27 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer; /* NEW: Make header clickable */
+            position: relative; /* NEW: For indicator positioning */
         }
+        
+        /* NEW: Collapsible Indicator (+/-) */
+        .semester-column h2::after {
+            content: '−'; /* Minus sign for expanded state */
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #aab5c0;
+            padding: 0 8px;
+        }
+
+        .semester-column.collapsed h2::after {
+            content: '+'; /* Plus sign for collapsed state */
+        }
+
         .semester-stats { display: flex; gap: 6px; }
         .credit-counter, .semester-gpa {
             color: white;
@@ -171,7 +192,24 @@
             background-color: #4a6fa5;
         }
         .semester-gpa { background-color: #6c757d; }
-        .course-list { min-height: 100px; flex-grow: 1; }
+        
+        .course-list { 
+            min-height: 100px; 
+            flex-grow: 1;
+            /* NEW: Styles for smooth collapse/expand */
+            transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+            max-height: 1500px; /* Large enough for any content */
+            overflow: hidden;
+            padding-top: 10px;
+        }
+        /* NEW: Collapsed state for the course list */
+        .semester-column.collapsed .course-list {
+            max-height: 0;
+            min-height: 0;
+            padding-top: 0;
+            overflow: hidden;
+        }
+
         .course-item {
             background-color: #f9f9f9;
             border: 1px solid #ddd;
@@ -312,7 +350,6 @@
     
     <footer>
         <p>
-            <a href="tel:+201096333138">(+20)1096333138</a> | 
             <a href="mailto:mohamed.nabil.seddik@gmail.com">mohamed.nabil.seddik@gmail.com</a> | 
             <a href="https://www.linkedin.com/in/mohamed-nabil-seddik/" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a> |
             <a href="https://www.instagram.com/cufemews/" target="_blank" rel="noopener noreferrer">CUFE MEWS Instagram</a>
@@ -449,8 +486,6 @@
             const plannerContainer = document.getElementById('plannerContainer');
             const majorSelector = document.getElementById('majorSelector');
             let draggedItem = null;
-            
-            // NEW: Variables for auto-scroll
             let isDragging = false;
             let currentY = 0;
 
@@ -465,10 +500,9 @@
                 document.getElementById('clearButton').addEventListener('click', clearSavedData);
                 addTouchListeners();
                 
-                // NEW: Start the auto-scroll loop and add listeners to track cursor position
                 autoScrollLoop();
                 plannerContainer.addEventListener('dragover', e => { currentY = e.clientY; });
-                plannerContainer.addEventListener('touchmove', e => { if (e.touches.length > 0) { currentY = e.touches[0].clientY; } }, { passive: false });
+                document.body.addEventListener('touchmove', e => { if (e.touches.length > 0) { currentY = e.touches[0].clientY; } }, { passive: false });
             }
 
             function populateMajorSelector() {
@@ -512,7 +546,7 @@
                     column.dataset.semesterId = title;
                     column.className = 'semester-column';
                     if (title.toLowerCase().includes('summer')) column.classList.add('summer-term');
-                    column.innerHTML = `<h2><span>${displayTitle}</span><div class="semester-stats"><span class="semester-gpa">GPA: 0.00</span><span class="credit-counter">0 CH</span></div></h2><div class="course-list"></div>`;
+                    column.innerHTML = `<h2><span class="semester-title-text">${displayTitle}</span><div class="semester-stats"><span class="semester-gpa">GPA: 0.00</span><span class="credit-counter">0 CH</span></div></h2><div class="course-list"></div>`;
                     plannerContainer.appendChild(column);
 
                     const option = document.createElement('option');
@@ -521,6 +555,22 @@
                     semesterSelect.appendChild(option);
                 });
                 addDragAndDropListeners();
+                addCollapseListeners(); // NEW: Add listeners for collapsing
+            }
+            
+            // NEW: Function to handle collapsing semesters
+            function addCollapseListeners() {
+                const headers = document.querySelectorAll('.semester-column h2');
+                headers.forEach(header => {
+                    header.addEventListener('click', (e) => {
+                        // Prevent toggle when clicking on editable fields or buttons inside the header if any
+                        if (e.target.isContentEditable || e.target.closest('button, select, input')) {
+                            return;
+                        }
+                        const parentColumn = header.closest('.semester-column');
+                        parentColumn.classList.toggle('collapsed');
+                    });
+                });
             }
 
             function createCourseElement(course) {
@@ -575,7 +625,6 @@
                     courseEl.appendChild(deleteBtn);
                 }
 
-                // UPDATED: Set isDragging flag for both desktop and mobile
                 courseEl.addEventListener('dragstart', () => { 
                     draggedItem = courseEl; 
                     isDragging = true;
@@ -591,18 +640,17 @@
                 return courseEl;
             }
             
-            // NEW: Auto-scroll function
             function autoScrollLoop() {
                 requestAnimationFrame(autoScrollLoop);
                 if (!isDragging) return;
 
-                const scrollThreshold = 75; // Pixels from the edge to trigger scroll
-                const scrollSpeed = 15;     // How fast to scroll
+                const scrollThreshold = 75;
+                const scrollSpeed = 15;
 
                 if (currentY < scrollThreshold) {
-                    window.scrollBy(0, -scrollSpeed); // Scroll up
+                    window.scrollBy(0, -scrollSpeed);
                 } else if (currentY > window.innerHeight - scrollThreshold) {
-                    window.scrollBy(0, scrollSpeed); // Scroll down
+                    window.scrollBy(0, scrollSpeed);
                 }
             }
 
@@ -627,13 +675,13 @@
 
                 plannerContainer.addEventListener('touchstart', e => {
                     const target = e.target.closest('.course-item');
-                    if (target && !e.target.isContentEditable) { // Prevent drag when editing text
-                        isDragging = true; // Set global flag
+                    if (target && !e.target.isContentEditable) {
+                        isDragging = true;
                         touchDraggedItem = target;
 
                         const rect = target.getBoundingClientRect();
                         ghostItem = target.cloneNode(true);
-                        ghostItem.style.position = 'fixed'; // Use fixed to ignore page scroll
+                        ghostItem.style.position = 'fixed';
                         ghostItem.style.width = `${rect.width}px`;
                         ghostItem.style.height = `${rect.height}px`;
                         ghostItem.style.pointerEvents = 'none';
@@ -649,14 +697,14 @@
                         
                         target.classList.add('dragging');
                     }
-                }, { passive: false });
+                }, { passive: true });
 
-                plannerContainer.addEventListener('touchmove', e => {
+                document.body.addEventListener('touchmove', e => {
                     if (!touchDraggedItem) return;
                     e.preventDefault();
 
                     const touch = e.touches[0];
-                    currentY = touch.clientY; // Update global Y position for auto-scroll
+                    currentY = touch.clientY;
                     ghostItem.style.left = `${touch.clientX - startX}px`;
                     ghostItem.style.top = `${touch.clientY - startY}px`;
                     
@@ -666,20 +714,18 @@
 
                     const dropTarget = elementBelow ? elementBelow.closest('.course-list') : null;
 
-                    if (lastOverElement && lastOverElement !== dropTarget) {
-                        lastOverElement.classList.remove('drag-over');
-                    }
-
+                    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                    
                     if (dropTarget) {
                         dropTarget.classList.add('drag-over');
                         lastOverElement = dropTarget;
                     }
                 }, { passive: false });
 
-                plannerContainer.addEventListener('touchend', e => {
+                document.body.addEventListener('touchend', e => {
                     if (!touchDraggedItem) return;
 
-                    isDragging = false; // Unset global flag
+                    isDragging = false; 
 
                     if(lastOverElement) {
                         lastOverElement.appendChild(touchDraggedItem);
