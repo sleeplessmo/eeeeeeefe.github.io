@@ -312,6 +312,7 @@
     
     <footer>
         <p>
+            <a href="tel:+201096333138">(+20)1096333138</a> | 
             <a href="mailto:mohamed.nabil.seddik@gmail.com">mohamed.nabil.seddik@gmail.com</a> | 
             <a href="https://www.linkedin.com/in/mohamed-nabil-seddik/" target="_blank" rel="noopener noreferrer">LinkedIn Profile</a> |
             <a href="https://www.instagram.com/cufemews/" target="_blank" rel="noopener noreferrer">CUFE MEWS Instagram</a>
@@ -457,6 +458,7 @@
                 document.getElementById('saveButton').addEventListener('click', savePlan);
                 document.getElementById('loadButton').addEventListener('click', loadPlan);
                 document.getElementById('clearButton').addEventListener('click', clearSavedData);
+                addTouchListeners(); // <-- Add this new function call
             }
 
             function populateMajorSelector() {
@@ -579,6 +581,83 @@
                         list.classList.remove('drag-over');
                         updateAllCalculations();
                     });
+                });
+            }
+
+            // ==========================================================
+            // === NEW FUNCTION FOR MOBILE/TOUCH DRAG-AND-DROP ===
+            // ==========================================================
+            function addTouchListeners() {
+                let touchDraggedItem = null;
+                let ghostItem = null;
+                let lastOverElement = null;
+                let startX, startY;
+
+                plannerContainer.addEventListener('touchstart', e => {
+                    const target = e.target.closest('.course-item');
+                    if (target) {
+                        e.preventDefault();
+                        touchDraggedItem = target;
+
+                        const rect = target.getBoundingClientRect();
+                        ghostItem = target.cloneNode(true);
+                        ghostItem.style.position = 'absolute';
+                        ghostItem.style.width = `${rect.width}px`;
+                        ghostItem.style.height = `${rect.height}px`;
+                        ghostItem.style.pointerEvents = 'none';
+                        ghostItem.style.opacity = '0.8';
+                        ghostItem.style.zIndex = '1000';
+                        document.body.appendChild(ghostItem);
+
+                        startX = e.touches[0].clientX - rect.left;
+                        startY = e.touches[0].clientY - rect.top;
+
+                        ghostItem.style.left = `${e.touches[0].clientX - startX}px`;
+                        ghostItem.style.top = `${e.touches[0].clientY - startY}px`;
+                        
+                        target.classList.add('dragging');
+                    }
+                }, { passive: false });
+
+                plannerContainer.addEventListener('touchmove', e => {
+                    if (!touchDraggedItem) return;
+                    e.preventDefault();
+
+                    const touch = e.touches[0];
+                    ghostItem.style.left = `${touch.clientX - startX}px`;
+                    ghostItem.style.top = `${touch.clientY - startY}px`;
+                    
+                    ghostItem.style.display = 'none';
+                    const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                    ghostItem.style.display = '';
+
+                    const dropTarget = elementBelow ? elementBelow.closest('.course-list') : null;
+
+                    if (lastOverElement && lastOverElement !== dropTarget) {
+                        lastOverElement.classList.remove('drag-over');
+                    }
+
+                    if (dropTarget) {
+                        dropTarget.classList.add('drag-over');
+                        lastOverElement = dropTarget;
+                    }
+                }, { passive: false });
+
+                plannerContainer.addEventListener('touchend', e => {
+                    if (!touchDraggedItem) return;
+
+                    if(lastOverElement) {
+                        lastOverElement.appendChild(touchDraggedItem);
+                        lastOverElement.classList.remove('drag-over');
+                        updateAllCalculations();
+                    }
+
+                    document.body.removeChild(ghostItem);
+                    touchDraggedItem.classList.remove('dragging');
+                    
+                    touchDraggedItem = null;
+                    ghostItem = null;
+                    lastOverElement = null;
                 });
             }
 
